@@ -147,7 +147,7 @@ def prep(dets_out, img, h, w, undo_transform=True, class_color=False, mask_alpha
         save = cfg.rescore_bbox
         cfg.rescore_bbox = True
         t = postprocess(dets_out, w, h, visualize_lincomb = False,
-                                        crop_masks        = False,
+                                        crop_masks        = True,
                                         score_threshold   = 0)
         cfg.rescore_bbox = save
 

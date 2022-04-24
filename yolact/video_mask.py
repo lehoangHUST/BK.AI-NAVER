@@ -59,6 +59,7 @@ def config_Yolact(yolact_weight):
         print("Done loading YOLACT" + '-'*10)
         return net.cuda()
 
+
 # Run multiple video
 def evaluate_videos(net_yolact, path: str, save_path: str):
     if not os.path.isdir(save_path):
@@ -76,8 +77,8 @@ def evaluate_video(net_yolact, path: str, save_path: str):
         print('Could not open video "%s"' % path)
         exit(-1)
 
-    target_fps   = round(vid.get(cv2.CAP_PROP_FPS))
-    frame_width  = round(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
+    target_fps = round(vid.get(cv2.CAP_PROP_FPS))
+    frame_width = round(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = round(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     # this format fail to play in Chrome/Win10/Colab
