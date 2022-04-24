@@ -30,6 +30,40 @@ parser.add_argument('--task', default='mask', type=str,
 args = parser.parse_args()
 
 
+def video2frame(path: str):
+    try:
+        filename = path.split('/')[-1]
+        name, suffix_path = filename.split('.')
+        dist_path = os.path.join(os.getcwd(), name)
+        if suffix_path in VID_FORMATS:
+            if not os.path.isdir(dist_path):
+                os.makedirs(dist_path)
+
+            vid = cv2.VideoCapture(path)
+
+            if not vid.isOpened():
+                print('Could not open video "%s"' % path)
+                exit(-1)
+            frame = None
+            idx_frame = 1
+            while True:
+                try:
+                    is_success, frame = vid.read()
+                except cv2.error:
+                    continue
+
+                if not is_success:
+                    break
+
+                cv2.imwrite(dist_path + '/' + str(idx_frame) + '.png', frame)
+                idx_frame += 1
+                # OPTIONAL: show last image
+            vid.release()
+        else:
+            raise TypeError
+    except OSError as e:
+        print(e.errno)
+
 # TODO: make config as a parameter instead of using a global parameter from yolact.data
 def config_Yolact(yolact_weight):
     # Load config from weight
