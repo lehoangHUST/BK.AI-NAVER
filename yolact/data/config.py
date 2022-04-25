@@ -172,6 +172,16 @@ pascal_sbd_dataset = dataset_base.copy({
     'class_names': PASCAL_CLASSES,
 })
 
+person_dataset = dataset_base.copy({
+          'name': 'Person',
+          'train_info': '/content/train.json',
+          'train_images': '/content/data/train/image',
+          'valid_info': '/content/val.json',
+          'valid_images': '/content/data/val/image/',
+          'class_names': ("person",),
+
+          'label_map': {0: 1}
+})
 
 
 
@@ -765,6 +775,23 @@ yolact_resnet50_pascal_config = yolact_resnet50_config.copy({
         'pred_scales': [[32], [64], [128], [256], [512]],
         'use_square_anchors': False,
     })
+})
+
+yolact_resnet50_person_config = yolact_base_config.copy({
+    'name': 'yolact_resnet50_person',
+
+    'backbone': resnet50_backbone.copy({
+        'selected_layers': list(range(1, 4)),
+
+        'pred_scales': yolact_base_config.backbone.pred_scales,
+        'pred_aspect_ratios': yolact_base_config.backbone.pred_aspect_ratios,
+        'use_pixel_scales': True,
+        'preapply_sqrt': False,
+        'use_square_anchors': True,  # This is for backward compatability with a bug
+    }),
+
+    'dataset': person_dataset,
+    'num_classes': len(person_dataset.class_names) + 1
 })
 
 # ----------------------- YOLACT++ CONFIGS ----------------------- #
