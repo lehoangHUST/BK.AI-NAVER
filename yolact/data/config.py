@@ -675,7 +675,7 @@ yolact_base_config = coco_base_config.copy({
     
     # Training params
     'lr_steps': (280000, 600000, 700000, 750000),
-    'max_iter': 800000,
+    'max_iter': 1400,
     
     # Backbone Settings
     'backbone': resnet101_backbone.copy({
@@ -782,12 +782,12 @@ yolact_resnet50_person_config = yolact_base_config.copy({
 
     'backbone': resnet50_backbone.copy({
         'selected_layers': list(range(1, 4)),
-
+      
         'pred_scales': yolact_base_config.backbone.pred_scales,
         'pred_aspect_ratios': yolact_base_config.backbone.pred_aspect_ratios,
         'use_pixel_scales': True,
         'preapply_sqrt': False,
-        'use_square_anchors': True,  # This is for backward compatability with a bug
+        'use_square_anchors': True, # This is for backward compatability with a bug
     }),
 
     'dataset': person_dataset,
