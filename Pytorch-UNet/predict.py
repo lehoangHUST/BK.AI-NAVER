@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 import torch
+import csv
 import torch.nn.functional as F
 from PIL import Image
 from torchvision import transforms
@@ -41,7 +42,6 @@ def predict_img(net,
     if net.n_classes == 1:
         return (full_mask > out_threshold).numpy()
     else:
-        print(torch.max(F.one_hot(full_mask.argmax(dim=0), net.n_classes)[0]))
         return F.one_hot(full_mask.argmax(dim=0), net.n_classes).permute(2, 0, 1).numpy()
 
 
@@ -49,7 +49,7 @@ def get_args():
     parser = argparse.ArgumentParser(description='Predict masks from input images')
     parser.add_argument('--model', '-m', default='MODEL.pth', metavar='FILE',
                         help='Specify the file in which the model is stored')
-    parser.add_argument('--input', '-i', metavar='INPUT', nargs='+', help='Filenames of input images', required=True)
+    parser.add_argument('--input', default='/content/test', type=str, help='Filenames of input images', required=True)
     parser.add_argument('--output', '-o', metavar='OUTPUT', nargs='+', help='Filenames of output images')
     parser.add_argument('--viz', '-v', action='store_true',
                         help='Visualize the images as they are processed')
@@ -59,6 +59,7 @@ def get_args():
     parser.add_argument('--scale', '-s', type=float, default=0.5,
                         help='Scale factor for the input images')
     parser.add_argument('--bilinear', action='store_true', default=False, help='Use bilinear upsampling')
+    parser.add_argument('--save_csv', action='store_true', default='/content/results.csv')
 
     return parser.parse_args()
 
@@ -77,6 +78,48 @@ def mask_to_image(mask: np.ndarray):
     elif mask.ndim == 3:
         return Image.fromarray((np.argmax(mask, axis=0) * 255).astype(np.uint8))
 
+def total_pixel(mask):
+    count_zero = 0
+    count_max = 0
+    mask = np.array(mask)
+    print(mask.shape)
+    for i in range (mask.shape[0]):
+        for j in range(mask.shape[1]):
+            if mask[i, j] == 255:
+                count_max += 1
+            if mask[i, j] == 0:
+                count_zero += 1
+    
+    print(count_max)
+    print(count_zero)
+
+# Encode image mask to file csv
+def rle_encode(img):
+    '''
+    img: numpy array, 1 - mask, 0 - background
+    Returns run length as string formated
+    '''
+    pixels = img.flatten()
+    pixels = np.concatenate([[0], pixels, [0]])
+    runs = np.where(pixels[1:] != pixels[:-1])[0] + 1
+    runs[1::2] -= runs[::2]
+    return ' '.join(str(x) for x in runs)
+
+def rle_decode(mask_rle, shape):
+    '''
+    mask_rle: run-length as string formated (start length)
+    shape: (height,width) of array to return 
+    Returns numpy array, 1 - mask, 0 - background
+
+    '''
+    s = mask_rle.split()
+    starts, lengths = [np.asarray(x, dtype=int) for x in (s[0:][::2], s[1:][::2])]
+    starts -= 1
+    ends = starts + lengths
+    img = np.zeros(shape[0]*shape[1], dtype=np.uint8)
+    for lo, hi in zip(starts, ends):
+        img[lo:hi] = 1
+    return img.reshape(shape)
 
 if __name__ == '__main__':
     args = get_args()
@@ -94,9 +137,10 @@ if __name__ == '__main__':
 
     logging.info('Model loaded!')
 
-    for i, filename in enumerate(in_files):
+    results = []
+    for i, filename in enumerate(os.listdir(in_files)):
         logging.info(f'\nPredicting image {filename} ...')
-        img = Image.open(filename)
+        img = Image.open(os.path.join(in_files, filename))
 
         mask = predict_img(net=net,
                            full_img=img,
@@ -105,12 +149,20 @@ if __name__ == '__main__':
                            device=device)
 
         if not args.no_save:
-            out_filename = out_files[i]
-            result = mask_to_image(mask)
-            print(np.array(result).max())
-            result.save(out_filename)
-            logging.info(f'Mask saved to {out_filename}')
+            result = np.array(mask_to_image(mask))
+            result = result.reshape(result.shape[0], result.shape[1], 1)
+            r = rle_encode(result)
+
+            # Append 
+            results.append([0, filename.split('/')[-1], r])
 
         if args.viz:
             logging.info(f'Visualizing results for image {filename}, close to continue...')
             plot_img_and_mask(img, mask)
+
+    # Save file 
+    with open(args.save_csv, 'w', encoding='UTF8', newline='') as f:
+        writer = csv.writer(f)
+
+        # write multiple rows
+        writer.writerows(results)

@@ -40,6 +40,7 @@ def dice_loss(input: Tensor, target: Tensor, multiclass: bool = False):
     return 1 - fn(input, target, reduce_batch_first=True)
 
 
+
 def Jaccard(input: Tensor, target: Tensor, reduce_batch_first: bool = False, epsilon=1e-6):
     # Average of Dice coefficient for all batches, or for a single mask
     assert input.size() == target.size()
@@ -69,9 +70,10 @@ def multiclass_Jaccard(input: Tensor, target: Tensor, reduce_batch_first: bool =
     return jaccard / input.shape[1]
 
 
-# Calculate Jaccard Loss
+"""
 def Jaccard_loss(input: Tensor, target: Tensor, multiclass: bool = False):
     # Dice loss (objective to minimize) between 0 and 1
     assert input.size() == target.size()
-    fn = multiclass_Jaccard if multiclass else Jaccard
+    fn = multiclass_dice_coeff if multiclass else dice_coeff
     return 1 - fn(input, target, reduce_batch_first=True)
+"""

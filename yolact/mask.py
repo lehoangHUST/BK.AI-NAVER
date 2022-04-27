@@ -180,6 +180,7 @@ def evaluate_image(net_yolact, path: str, save_path: str):
                 mask = img
         cv2.imwrite(save_path, mask)
 
+
 def evaluate_images(net_yolact, path: str, save_path: str):
     if not os.path.isdir(save_path):
         os.makedirs(save_path)
