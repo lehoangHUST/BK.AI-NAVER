@@ -78,6 +78,7 @@ def mask_to_image(mask: np.ndarray):
     elif mask.ndim == 3:
         return Image.fromarray((np.argmax(mask, axis=0) * 255).astype(np.uint8))
 
+
 def total_pixel(mask):
     count_zero = 0
     count_max = 0
@@ -90,8 +91,9 @@ def total_pixel(mask):
             if mask[i, j] == 0:
                 count_zero += 1
     
-    print(count_max)
-    print(count_zero)
+    print(f"Total pixel have value zero is {count_zero} \n"
+          f"Total pixel have value max (255) is {count_max}.")
+
 
 # Encode image mask to file csv
 def rle_encode(img):
@@ -104,6 +106,7 @@ def rle_encode(img):
     runs = np.where(pixels[1:] != pixels[:-1])[0] + 1
     runs[1::2] -= runs[::2]
     return ' '.join(str(x) for x in runs)
+
 
 def rle_decode(mask_rle, shape):
     '''
@@ -120,6 +123,7 @@ def rle_decode(mask_rle, shape):
     for lo, hi in zip(starts, ends):
         img[lo:hi] = 1
     return img.reshape(shape)
+
 
 if __name__ == '__main__':
     args = get_args()
