@@ -69,6 +69,7 @@ def video2frame(path: str):
     except OSError as e:
         print(e.errno)
 
+
 # TODO: make config as a parameter instead of using a global parameter from yolact.data
 def config_Yolact(yolact_weight):
     # Load config from weight
@@ -105,7 +106,7 @@ def evaluate_videos(net_yolact, path: str, save_path: str):
         os.mkdir(save_path)
     
     for vid in os.listdir(path):
-        evaluate_video(net_yolact, os.path.join(path, vid), save_path)
+        evaluate_video(net_yolact, os.path.join(path, vid), os.path.join(save_path, vid))
 
 
 # Run video
@@ -123,7 +124,7 @@ def evaluate_video(net_yolact, path: str, save_path: str):
     # this format fail to play in Chrome/Win10/Colab
     fourcc = cv2.VideoWriter_fourcc(*'MP4V') #codec
     # fourcc = cv2.VideoWriter_fourcc(*'H264') #codec
-    output = cv2.VideoWriter(save_path + '/' + path.split('/')[-1], fourcc, target_fps, (frame_width, frame_height))
+    output = cv2.VideoWriter(save_path, fourcc, target_fps, (frame_width, frame_height))
 
     frame = None
     while True:
@@ -209,6 +210,7 @@ def run(args):
     elif args.images is not None:
         inp, out = args.images.split(':')
         evaluate_images(net_yolact, inp, out)
+
 
 if __name__ == '__main__':
     run(args)
