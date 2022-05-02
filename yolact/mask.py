@@ -32,13 +32,15 @@ parser.add_argument('--task', default='mask', type=str,
 args = parser.parse_args()
 
 
-# Calculate IoU
+VID_FORMATS = ['avi', 'mp4']
+IMG_FORMATS = ['jpg', 'png', 'jpeg']
 
 
 def video2frame(path: str):
     try:
         filename = path.split('/')[-1]
         name, suffix_path = filename.split('.')
+        print(os.getcwd())
         dist_path = os.path.join(os.getcwd(), name)
         if suffix_path in VID_FORMATS:
             if not os.path.isdir(dist_path):
@@ -213,5 +215,5 @@ def run(args):
 
 
 if __name__ == '__main__':
-    run(args)
+    video2frame('C:/Users/Administrator/Downloads/1 (2).avi')
 
