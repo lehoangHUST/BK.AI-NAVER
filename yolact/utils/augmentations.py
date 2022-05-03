@@ -72,7 +72,6 @@ class ConvertFromInts(object):
         return image.astype(np.float32), masks, boxes, labels
 
 
-
 class ToAbsoluteCoords(object):
     def __call__(self, image, masks=None, boxes=None, labels=None):
         height, width, channels = image.shape
@@ -126,6 +125,7 @@ class Pad(object):
 
         return expand_image, masks, boxes, labels
 
+
 class Resize(object):
     """ If preserve_aspect_ratio is true, this resizes to an approximate area of max_size * max_size """
 
@@ -164,7 +164,7 @@ class Resize(object):
                 masks = masks.transpose((2, 0, 1))
 
             # Scale bounding boxes (which are currently absolute coordinates)
-            boxes[:, [0, 2]] *= (width  / img_w)
+            boxes[:, [0, 2]] *= (width / img_w)
             boxes[:, [1, 3]] *= (height / img_h)
 
         # Discard boxes that are smaller than we'd like
@@ -453,7 +453,7 @@ class RandomMirror(object):
 
 class RandomFlip(object):
     def __call__(self, image, masks, boxes, labels):
-        height , _ , _ = image.shape
+        height, _, _ = image.shape
         if random.randint(2):
             image = image[::-1, :]
             masks = masks[:, ::-1, :]
@@ -524,6 +524,7 @@ class PhotometricDistort(object):
         im, masks, boxes, labels = distort(im, masks, boxes, labels)
         return self.rand_light_noise(im, masks, boxes, labels)
 
+
 class PrepareMasks(object):
     """
     Prepares the gt masks for use_gt_bboxes by cropping with the gt box
@@ -558,10 +559,11 @@ class PrepareMasks(object):
             new_masks[i, :] = scaled_mask.reshape(1, -1)
         
         # Binarize
-        new_masks[new_masks >  0.5] = 1
+        new_masks[new_masks > 0.5] = 1
         new_masks[new_masks <= 0.5] = 0
 
         return image, new_masks, boxes, labels
+
 
 class BackboneTransform(object):
     """
@@ -573,7 +575,7 @@ class BackboneTransform(object):
     """
     def __init__(self, transform, mean, std, in_channel_order):
         self.mean = np.array(mean, dtype=np.float32)
-        self.std  = np.array(std,  dtype=np.float32)
+        self.std = np.array(std,  dtype=np.float32)
         self.transform = transform
 
         # Here I use "Algorithms and Coding" to convert string permutations to numbers
@@ -596,8 +598,6 @@ class BackboneTransform(object):
         return img.astype(np.float32), masks, boxes, labels
 
 
-
-
 class BaseTransform(object):
     """ Transorm to be used when evaluating. """
 
@@ -611,7 +611,9 @@ class BaseTransform(object):
     def __call__(self, img, masks=None, boxes=None, labels=None):
         return self.augment(img, masks, boxes, labels)
 
+
 import torch.nn.functional as F
+
 
 class FastBaseTransform(torch.nn.Module):
     """
@@ -624,7 +626,7 @@ class FastBaseTransform(torch.nn.Module):
         super().__init__()
 
         self.mean = torch.Tensor(MEANS).float().cuda()[None, :, None, None]
-        self.std  = torch.Tensor( STD ).float().cuda()[None, :, None, None]
+        self.std = torch.Tensor(STD).float().cuda()[None, :, None, None]
         self.transform = cfg.backbone.transform
 
     def forward(self, img):
@@ -663,6 +665,7 @@ def do_nothing(img=None, masks=None, boxes=None, labels=None):
 
 def enable_if(condition, obj):
     return obj if condition else do_nothing
+
 
 class SSDAugmentation(object):
     """ Transform to be used when training. """

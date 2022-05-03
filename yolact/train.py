@@ -169,6 +169,7 @@ class CustomDataParallel(nn.DataParallel):
         
         return out
 
+
 def train():
     if not os.path.exists(args.save_folder):
         os.mkdir(args.save_folder)
@@ -250,8 +251,7 @@ def train():
                                   num_workers=args.num_workers,
                                   shuffle=True, collate_fn=detection_collate,
                                   pin_memory=True)
-    
-    
+
     save_path = lambda epoch, iteration: SavePath(cfg.name, epoch, iteration).get_path(root=args.save_folder)
     time_avg = MovingAverage()
 
