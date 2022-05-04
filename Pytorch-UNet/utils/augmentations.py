@@ -34,9 +34,22 @@ class Compose:
             img, masks = t(img, masks)
         return img, masks
 
+class BaseTransform:
+    """ Base transform when training model """
+    def __init__(self):
+        self.augment = Compose([
+            RandomContrast(lower=0.5, upper=1.5),
+            RandomBrightness(delta=32),
+            RandomFlip()
+        ])
+
+    def __call__(self, img, masks):
+        img = img.astype('float64')
+        return self.augment(img, masks)
+
 
 class RandomHue:
-    def __init__(self, delta=18.0):
+    def __init__(self, delta=32.0):
         assert delta >= 0.0 and delta <= 360.0
         self.delta = delta
 
