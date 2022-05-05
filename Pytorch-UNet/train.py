@@ -16,8 +16,10 @@ from utils.metrics import dice_loss
 from evaluate import evaluate
 from unet import UNet
 
-dir_img = Path('/content/segment_data/image')
-dir_mask = Path('/content/segment_data/mask')
+dir_img_train = Path('/content/data/train/image')
+dir_mask_train = Path('/content/data/train/mask')
+dir_img_val = Path('/content/data/val/image')
+dir_mask_val = Path('/content/data/val/mask')
 dir_checkpoint = Path('/content/checkpoints/')
 
 
@@ -32,14 +34,15 @@ def train_net(net,
               amp: bool = False):
     # 1. Create dataset
     try:
-        dataset = CarvanaDataset(dir_img, dir_mask, img_scale)
+        train_set = CarvanaDataset(dir_img_train, dir_mask_train, img_scale, task='train')
+        val_set = CarvanaDataset(dir_img_val, dir_mask_val, img_scale, task='val')
     except (AssertionError, RuntimeError):
-        dataset = BasicDataset(dir_img, dir_mask, img_scale)
+        train_set = BasicDataset(dir_img_train, dir_mask_train, img_scale, task='train')
+        val_set = BasicDataset(dir_img_val, dir_mask_val, img_scale, task='val')
 
     # 2. Split into train / validation partitions
-    n_val = int(len(dataset) * val_percent)
-    n_train = len(dataset) - n_val
-    train_set, val_set = random_split(dataset, [n_train, n_val], generator=torch.Generator().manual_seed(0))
+    n_val = len(val_set)
+    n_train = len(train_set) - n_val
 
     # 3. Create data loaders
     loader_args = dict(batch_size=batch_size, num_workers=4, pin_memory=True)

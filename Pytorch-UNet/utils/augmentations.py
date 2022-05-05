@@ -34,6 +34,7 @@ class Compose:
             img, masks = t(img, masks)
         return img, masks
 
+
 class BaseTransform:
     """ Base transform when training model """
     def __init__(self):
@@ -109,5 +110,5 @@ class RandomFlip:
         height, _, _ = image.shape
         if random.randint(2):
             image = image[:, ::-1, :]
-            masks = masks[:, ::-1, :]
+            masks = masks[:, ::-1]
         return image, masks

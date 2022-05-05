@@ -10,11 +10,12 @@ from torch.utils.data import Dataset
 
 
 class BasicDataset(Dataset):
-    def __init__(self, images_dir: str, masks_dir: str, scale: float = 1.0, mask_suffix: str = ''):
+    def __init__(self, images_dir: str, masks_dir: str, scale: float = 1.0, task: str = 'train', mask_suffix: str = ''):
         self.images_dir = Path(images_dir)
         self.masks_dir = Path(masks_dir)
         assert 0 < scale <= 1, 'Scale must be between 0 and 1'
         self.scale = scale
+        self.task = task
         self.mask_suffix = mask_suffix
 
         self.ids = [splitext(file)[0] for file in listdir(images_dir) if not file.startswith('.')]
@@ -76,5 +77,5 @@ class BasicDataset(Dataset):
 
 
 class CarvanaDataset(BasicDataset):
-    def __init__(self, images_dir, masks_dir, scale=1):
-        super().__init__(images_dir, masks_dir, scale, mask_suffix='_mask')
+    def __init__(self, images_dir, masks_dir, scale=1, task='train'):
+        super().__init__(images_dir, masks_dir, scale, task)
